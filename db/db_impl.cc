@@ -1960,6 +1960,11 @@ Status DB::Delete(const WriteOptions& opt, const Slice& key) {
 
 DB::~DB() { }
 
+Status DB::Open(const Options& options, const std::string& dbname,
+                DB** dbptr) {
+    return Open(options, dbname, dbname, dbptr);
+}
+
 Status DB::Open(const Options& options, const std::string& dbname_disk,
         const std::string& dbname_mem, DB** dbptr) {
     *dbptr = NULL;
@@ -2039,6 +2044,10 @@ Status DB::Open(const Options& options, const std::string& dbname_disk,
     Snapshot::~Snapshot() {
     }
 
+    Status DestroyDB(const std::string& name, const Options& options)
+    {
+    	return DestroyDB(name, options);
+    }
     Status DestroyDB(const std::string& dbname_disk, const std::string& dbname_mem, const Options& options) {
         Env* env = options.env;
         std::vector<std::string> filenames;
