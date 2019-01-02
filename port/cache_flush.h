@@ -5,7 +5,7 @@
 #include <stdlib.h>
 
 #ifdef _ENABLE_PMEMIO
-#include "pmdk/src/include/libpmem.h"
+#include "libpmem.h"
 #endif
 
 //Cacheline size
