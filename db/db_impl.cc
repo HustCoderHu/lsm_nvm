@@ -2046,7 +2046,7 @@ Status DB::Open(const Options& options, const std::string& dbname_disk,
 
     Status DestroyDB(const std::string& name, const Options& options)
     {
-    	return DestroyDB(name, options);
+    	return DestroyDB(name, name, options);
     }
     Status DestroyDB(const std::string& dbname_disk, const std::string& dbname_mem, const Options& options) {
         Env* env = options.env;
