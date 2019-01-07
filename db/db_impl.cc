@@ -76,6 +76,11 @@ uint64_t mem_hits=0;
 uint64_t imm_hits=0;
 uint64_t sstable_hits = 0;
 
+static std::string FLAGS_db_disk="";
+static std::string FLAGS_db_mem="";
+static size_t FLAGS_nvm_buffer_size = 0;
+static int FLAGS_num_levels = 1;
+static int FLAGS_num_read_threads=0;
 
 // Information kept for every waiting writer
 struct DBImpl::Writer {
@@ -1962,12 +1967,21 @@ DB::~DB() { }
 
 Status DB::Open(const Options& options, const std::string& dbname,
                 DB** dbptr) {
-    return Open(options, dbname, dbname, dbptr);
+    // for leveldbjni test
+    Options opt(options);
+    opt.nvm_buffer_size = strtoull(getenv("FLAGS_nvm_buffer_size"), NULL, 10);
+    opt.num_levels = atoi(getenv("FLAGS_num_levels"));
+    opt.num_read_threads = atoi(getenv("FLAGS_num_read_threads"));
+    
+    FLAGS_db_disk = getenv("FLAGS_db_disk");
+    FLAGS_db_mem = getenv("FLAGS_db_mem");
+    return Open(opt, FLAGS_db_disk, FLAGS_db_mem, dbptr);
 }
 
 Status DB::Open(const Options& options, const std::string& dbname_disk,
         const std::string& dbname_mem, DB** dbptr) {
     *dbptr = NULL;
+
     DBImpl* impl = new DBImpl(options, dbname_disk, dbname_mem);
     impl->mutex_.Lock();
     VersionEdit edit;
@@ -2046,7 +2060,7 @@ Status DB::Open(const Options& options, const std::string& dbname_disk,
 
     Status DestroyDB(const std::string& name, const Options& options)
     {
-    	return DestroyDB(name, name, options);
+    	return DestroyDB(FLAGS_db_disk, FLAGS_db_mem, options);
     }
     Status DestroyDB(const std::string& dbname_disk, const std::string& dbname_mem, const Options& options) {
         Env* env = options.env;
