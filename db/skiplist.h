@@ -34,6 +34,10 @@
 #include "util/random.h"
 #include "port/cache_flush.h"
 
+#ifndef NVM_DEBUG
+  #define NVM_DEBUG
+#endif
+#include "util/mydebug.h"
 
 namespace leveldb {
 
@@ -236,12 +240,14 @@ SkipList<Key,Comparator>::NewNode(const Key& key, int height, bool head_alloc) {
     bool return_special = head_alloc && arena_->nvmarena_;
     if(arena_->nvmarena_) {
         ArenaNVM *nvm_arena = (ArenaNVM *)arena_;
+//		DBG_PRINT();
         if (head_alloc == true)
             mem = nvm_arena->AllocateAlignedNVM(
                     sizeof(size_t) + sizeof (uint64_t) + sizeof(int) + sizeof(Node) + sizeof(port::AtomicPointer) * (height - 1));
         else
             mem = nvm_arena->AllocateAlignedNVM(
                     sizeof(Node) + sizeof(port::AtomicPointer) * (height - 1));
+//		DBG_PRINT();
     }else {
         mem = arena_->AllocateAligned(
                 sizeof(Node) + sizeof(port::AtomicPointer) * (height - 1));
@@ -433,6 +439,7 @@ inline void SkipList<Key,Comparator>::Iterator::SetHead(void *ptr) {
           //head_(NewNode(0 /* any key will do */, kMaxHeight)),
           max_height_(reinterpret_cast<void*>(1)),
           rnd_(0xdeadbeef) {
+//            DBG_PRINT();
 #ifdef ENABLE_RECOVERY
             if (recovery) {
                 ArenaNVM *arena_nvm = (ArenaNVM*) arena;
@@ -444,11 +451,14 @@ inline void SkipList<Key,Comparator>::Iterator::SetHead(void *ptr) {
             }
             else
 #endif
+//			DBG_PRINT();
+
 #ifdef ENABLE_RECOVERY
-                head_ = NewNode(0, kMaxHeight, true);
+            head_ = NewNode(0, kMaxHeight, true);
 #else
             head_ = NewNode(0, kMaxHeight, false);
 #endif
+//			DBG_PRINT();
 
 #ifdef ENABLE_RECOVERY
             if (!recovery && arena->nvmarena_) {
@@ -471,11 +481,14 @@ inline void SkipList<Key,Comparator>::Iterator::SetHead(void *ptr) {
             head_offset_ = (reinterpret_cast<void*>(arena_->CalculateOffset(static_cast<void*>(head_))));
             //head_offset_ = (size_t)(arena_->CalculateOffset(static_cast<void*>(head_)));
 
+//			DBG_PRINT();
+
             if (!recovery) {
                 for (int i = 0; i < kMaxHeight; i++) {
                     head_->SetNext(i, NULL);
                 }
             }
+//			DBG_PRINT();
         }
 
 #ifdef ENABLE_RECOVERY

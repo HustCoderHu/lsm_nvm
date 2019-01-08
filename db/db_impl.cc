@@ -44,6 +44,11 @@
 #include <chrono>
 #include <ctime>
 
+#ifndef NVM_DEBUG
+  #define NVM_DEBUG
+#endif
+#include "util/mydebug.h"
+
 using namespace std;
 
 namespace leveldb {
@@ -1738,10 +1743,12 @@ MemTable* DBImpl::CreateMemTable(void) {
 MemTable* DBImpl::CreateNVMtable(bool assign_map){
 
     MemTable* mem;
+//	DBG_PRINT();
 #ifdef ENABLE_RECOVERY
     uint64_t new_map_number = versions_->NewFileNumber();
     size_t size = 0;
     std::string filename = MapFileName(dbname_mem_, new_map_number);
+	DBG_PRINT("filename: %s", filename.c_str());
     size = nvmbuff_;
     if (!assign_map)
         mapfile_number_ = new_map_number;
@@ -1749,6 +1756,7 @@ MemTable* DBImpl::CreateNVMtable(bool assign_map){
 #else
     ArenaNVM *arena= new ArenaNVM();
 #endif
+//	DBG_PRINT();
     mem = new MemTable(internal_comparator_, *arena, false);
     mem->isNVMMemtable = true;
     assert(mem);
@@ -1767,6 +1775,7 @@ int DBImpl::SwapMemtables() {
     if (use_multiple_levels) {
         if (!mem_->isNVMMemtable) {
             options_.write_buffer_size = nvmbuff_;
+//			DBG_PRINT();
             mem_ =  CreateNVMtable(false);
             mem_->isNVMMemtable = true;
         } else {
@@ -1845,6 +1854,7 @@ Status DBImpl::MakeRoomForWrite(bool force) {
             MemTable *imm = mem_;
             if(predict_on)
                 mem_->ClearPredictIndex(&mem_->predict_set);
+//			DBG_PRINT();
             SwapMemtables();
             imm_ = imm;
             has_imm_.Release_Store(imm_);
@@ -1975,6 +1985,15 @@ Status DB::Open(const Options& options, const std::string& dbname,
     
     FLAGS_db_disk = getenv("FLAGS_db_disk");
     FLAGS_db_mem = getenv("FLAGS_db_mem");
+	using std::cout;
+	using std::endl;
+	cout << "FLAGS_db_disk: " << FLAGS_db_disk << endl;
+	cout << "FLAGS_db_mem:  " << FLAGS_db_mem << endl;
+	cout << "FLAGS_nvm_buffer_size:  " << opt.nvm_buffer_size << endl;
+	cout << "FLAGS_num_levels:  " << opt.num_levels << endl;
+	cout << "FLAGS_num_read_threads:  " << opt.num_read_threads << endl;
+	cout << endl;
+	
     return Open(opt, FLAGS_db_disk, FLAGS_db_mem, dbptr);
 }
 

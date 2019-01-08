@@ -11,6 +11,10 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#ifndef NVM_DEBUG
+  #define NVM_DEBUG
+#endif
+#include "util/mydebug.h"
 
 static const long kBlockSize = 4096;
 static int mmap_count = 0;
@@ -221,8 +225,10 @@ char* ArenaNVM::AllocateNVMBlock(size_t block_bytes) {
     //NoveLSM
 #ifdef ENABLE_RECOVERY
     fd = open(mfile.c_str(), O_RDWR);
+	DBG_PRINT("O_RDWR fd = %d", fd);
     if (fd == -1) {
         fd = open(mfile.c_str(), O_RDWR | O_CREAT, 0664);
+		DBG_PRINT("O_CREAT fd = %d", fd);
         if (fd < 0)
             return NULL;
     }
