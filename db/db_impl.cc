@@ -81,6 +81,7 @@ uint64_t mem_hits=0;
 uint64_t imm_hits=0;
 uint64_t sstable_hits = 0;
 
+static bool FLAGS_use_existing_db=false;
 static std::string FLAGS_db_disk="";
 static std::string FLAGS_db_mem="";
 static size_t FLAGS_nvm_buffer_size = 0;
@@ -1979,20 +1980,23 @@ Status DB::Open(const Options& options, const std::string& dbname,
                 DB** dbptr) {
     // for leveldbjni test
     Options opt(options);
+    FLAGS_use_existing_db = atoi(getenv("FLAGS_use_existing_db"));
+    FLAGS_db_disk = getenv("FLAGS_db_disk");
+    FLAGS_db_mem = getenv("FLAGS_db_mem");
+    opt.create_if_missing = !FLAGS_use_existing_db;
     opt.nvm_buffer_size = strtoull(getenv("FLAGS_nvm_buffer_size"), NULL, 10);
     opt.num_levels = atoi(getenv("FLAGS_num_levels"));
     opt.num_read_threads = atoi(getenv("FLAGS_num_read_threads"));
     
-    FLAGS_db_disk = getenv("FLAGS_db_disk");
-    FLAGS_db_mem = getenv("FLAGS_db_mem");
 	using std::cout;
 	using std::endl;
-	cout << "FLAGS_db_disk: " << FLAGS_db_disk << endl;
-	cout << "FLAGS_db_mem:  " << FLAGS_db_mem << endl;
-	cout << "FLAGS_nvm_buffer_size:  " << opt.nvm_buffer_size << endl;
-	cout << "FLAGS_num_levels:  " << opt.num_levels << endl;
-	cout << "FLAGS_num_read_threads:  " << opt.num_read_threads << endl;
-	cout << endl;
+    cout << "FLAGS_use_existing_db: " << FLAGS_use_existing_db << endl;
+    cout << "FLAGS_db_disk: " << FLAGS_db_disk << endl;
+    cout << "FLAGS_db_mem:  " << FLAGS_db_mem << endl;
+    cout << "FLAGS_nvm_buffer_size:  " << opt.nvm_buffer_size << endl;
+    cout << "FLAGS_num_levels:  " << opt.num_levels << endl;
+    cout << "FLAGS_num_read_threads:  " << opt.num_read_threads << endl;
+    cout << endl;
 	
     return Open(opt, FLAGS_db_disk, FLAGS_db_mem, dbptr);
 }
