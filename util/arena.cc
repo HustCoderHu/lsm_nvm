@@ -12,7 +12,7 @@
 #include <fcntl.h>
 
 #ifndef NVM_DEBUG
-  #define NVM_DEBUG
+//  #define NVM_DEBUG
 #endif
 #include "util/mydebug.h"
 

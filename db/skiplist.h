@@ -35,7 +35,7 @@
 #include "port/cache_flush.h"
 
 #ifndef NVM_DEBUG
-  #define NVM_DEBUG
+//  #define NVM_DEBUG
 #endif
 #include "util/mydebug.h"
 
